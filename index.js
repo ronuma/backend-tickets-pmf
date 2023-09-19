@@ -2,13 +2,13 @@ import express from "express";
 import cors from "cors";
 // import {connectToDB} from "./db.js";
 import {PORT} from "./constants.js";
-import {sampleRouter} from "./routes/sample.js";
+import {ticketsRouter} from "./routes/tickets.js";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use("/sample", sampleRouter);
+app.use("/tickets", ticketsRouter);
 
 app.listen(PORT, () => {
    console.log(`Server is running on port ${PORT}.`);
