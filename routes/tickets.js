@@ -1,13 +1,14 @@
 import {Router} from "express";
-import {dummyManyTickets} from "../constants.js";
+import {sampleTickets} from "../constants.js";
 
 const router = Router();
 
 router.get("/", async (_req, res) => {
    try {
+      res.setHeader("Content-Range", `tickets 0-${sampleTickets.length}/${sampleTickets.length}`);
       res.json({
          msg: "Tickets obtenidos correctamente",
-         data: dummyManyTickets,
+         data: sampleTickets,
       });
    } catch (error) {
       console.log("GET ERROR: ", error);
@@ -21,7 +22,7 @@ router.get("/", async (_req, res) => {
 router.get("/:id", async (req, res) => {
    try {
       const {id} = req.params;
-      const ticket = dummyManyTickets.find(ticket => ticket.id === Number(id));
+      const ticket = sampleTickets.find(ticket => ticket.id === Number(id));
       if (!ticket) {
          res.status(404).json({
             msg: "Ticket no encontrado",

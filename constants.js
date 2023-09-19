@@ -1,6 +1,6 @@
 export const PORT = 8080;
 
-export const dummyManyTickets = [
+export const sampleTickets = [
    {
       id: 1,
       name: "Ticket 1",
