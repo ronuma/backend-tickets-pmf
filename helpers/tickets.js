@@ -16,6 +16,7 @@ export async function createTicket(ticket) {
 }
 
 export async function updateTicket(id, ticket) {
+   delete ticket._id; // borrando el id unico por el momento para que funcione
    const result = await db.collection("tickets").updateOne({id: Number(id)}, {$set: ticket});
    return result;
 }
