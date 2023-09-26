@@ -1,19 +1,27 @@
 import {Router} from "express";
-import {sampleTickets} from "../constants.js";
+import {
+   getTickets,
+   getTicketById,
+   createTicket,
+   updateTicket,
+   deleteTicket,
+} from "../helpers/tickets.js";
+import {validatePost, validatePut} from "../middlewares/tickets.js";
 
 const router = Router();
 
 router.get("/", async (_req, res) => {
    try {
-      res.setHeader("Content-Range", `tickets 0-${sampleTickets.length}/${sampleTickets.length}`);
+      const data = await getTickets();
+      res.setHeader("Content-Range", `tickets 0-${data.length}/${data.length}`);
       res.json({
          msg: "Tickets obtenidos correctamente",
-         data: sampleTickets,
+         data,
       });
    } catch (error) {
-      console.log("GET ERROR: ", error);
+      console.log("GET TICKETS ERROR: ", error);
       res.status(500).json({
-         msg: "Error al obtener los datos",
+         msg: "Error al obtener los tickets",
          error,
       });
    }
@@ -22,9 +30,9 @@ router.get("/", async (_req, res) => {
 router.get("/:id", async (req, res) => {
    try {
       const {id} = req.params;
-      const ticket = sampleTickets.find(ticket => ticket.id === Number(id));
+      const ticket = await getTicketById(id);
       if (!ticket) {
-         res.status(404).json({
+         return res.status(404).json({
             msg: "Ticket no encontrado",
          });
       }
@@ -33,9 +41,59 @@ router.get("/:id", async (req, res) => {
          data: ticket,
       });
    } catch (error) {
-      console.log("GET BY ID ERROR: ", error);
+      console.log("GET TICKET BY ID ERROR: ", error);
       res.status(500).json({
          msg: "Error al obtener el ticket",
+         error,
+      });
+   }
+});
+
+router.post("/", validatePost, async (req, res) => {
+   try {
+      const result = await createTicket(req.body);
+      res.json({
+         msg: "Ticket creado correctamente",
+         data: result,
+      });
+   } catch (error) {
+      console.log("POST TICKET ERROR: ", error);
+      res.status(500).json({
+         msg: "Error al crear el ticket",
+         error,
+      });
+   }
+});
+
+router.put("/:id", validatePut, async (req, res) => {
+   try {
+      const {id} = req.params;
+      const result = await updateTicket(id, req.body);
+      res.json({
+         msg: "Ticket actualizado correctamente",
+         data: result,
+      });
+   } catch (error) {
+      console.log("PUT TICKET ERROR: ", error);
+      res.status(500).json({
+         msg: "Error al actualizar el ticket",
+         error,
+      });
+   }
+});
+
+router.delete("/:id", async (req, res) => {
+   try {
+      const {id} = req.params;
+      const result = await deleteTicket(id);
+      res.json({
+         msg: "Ticket eliminado correctamente",
+         data: result,
+      });
+   } catch (error) {
+      console.log("DELETE TICKET ERROR: ", error);
+      res.status(500).json({
+         msg: "Error al eliminar el ticket",
          error,
       });
    }

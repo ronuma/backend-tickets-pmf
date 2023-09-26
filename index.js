@@ -1,6 +1,6 @@
 import express from "express";
+import "dotenv/config";
 import cors from "cors";
-// import {connectToDB} from "./db.js";
 import {PORT} from "./constants.js";
 import {ticketsRouter} from "./routes/tickets.js";
 
@@ -14,9 +14,6 @@ app.listen(PORT, () => {
    console.log(`Server is running on port ${PORT}.`);
 });
 
-// CODIGO QUE NOS HABIA DADO JORGE
-//
-// const db = await connectToDB();
 //
 // app.get("/test", async (req, res) => {
 //    const data = await db.collection("test").find({}).project({_id: 0}).toArray();
