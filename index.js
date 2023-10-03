@@ -31,12 +31,39 @@ function verifyJWT(req, res, next) {
 
 app.use("/tickets", verifyJWT, ticketsRouter);
 
-app.post("/registrarse", async (req, res) => {
-   //... Registration logic (keep as in your original snippet or refactor as needed)
+app.post("/registrarse", async (request, response) => {
+   let user = request.body.username;
+   let pass = request.body.password;
+   let fname = request.body.fullName;
+   let role = request.body.role;
+
+   const validRoles = ["Aula", "Nacional", "Ejecutivo"];
+   if (!validRoles.includes(role)) {
+      return response.status(400).send("Rol inválido");
+   }
+
+   let existingUser = await db.collection("usuarios").findOne({usuario: user});
+
+   if (existingUser == null) {
+      try {
+         bcrypt.genSalt(10, (error, salt) => {
+            if (error) throw error;
+            bcrypt.hash(pass, salt, async (error, hash) => {
+               if (error) throw error;
+               let newUser = {usuario: user, password: hash, fullName: fname, role: role};
+               await db.collection("usuarios").insertOne(newUser);
+               response.sendStatus(201); // Created
+            });
+         });
+      } catch (error) {
+         response.sendStatus(500);
+      }
+   } else {
+      response.sendStatus(409); // user exists
+   }
 });
 
 app.post("/login", async (req, res) => {
-   //... Login logic (keep as in your original snippet or refactor as needed)
    const {username, password} = req.body;
    const user = await db.collection("usuarios").findOne({usuario: username});
    if (!user) {
@@ -46,7 +73,10 @@ app.post("/login", async (req, res) => {
    if (!passwordMatches) {
       return res.status(401).send("Credenciales inválidas");
    }
-   const token = jwt.sign({username: user.username}, SECRET_KEY, {expiresIn: "1h"});
+   const token = jwt.sign({username: user.username, role: user.role}, SECRET_KEY, {
+      expiresIn: "1h",
+   });
+
    res.json({token, username: user.username});
 });
 
