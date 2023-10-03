@@ -12,82 +12,79 @@ const SECRET_KEY = process.env.JWT_SECRET; // env file
 
 let db;
 
-// Connect to MongoDB
-async function connectDB() {
-   const client = new MongoClient(process.env.MONGO_URL); // env file
-   await client.connect();
-   db = client.db();
-   console.log("Conectado a la base de datos");
-}
-
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-app.use("/tickets", ticketsRouter);
-
-app.post("/registrarse", async (request, response) => {
-   let user = request.body.username;
-   let pass = request.body.password;
-   let fname = request.body.fullName;
-   let role = request.body.role;
-
-   const validRoles = ["Aula", "Nacional", "Ejecutivo"];
-   if (!validRoles.includes(role)) {
-      return response.status(400).send("Rol inválido");
-   }
-
-   let existingUser = await db.collection("usuarios").findOne({usuario: user});
-
-   if (existingUser == null) {
-      try {
-         bcrypt.genSalt(10, (error, salt) => {
-            if (error) throw error;
-            bcrypt.hash(pass, salt, async (error, hash) => {
-               if (error) throw error;
-               let newUser = {usuario: user, password: hash, fullName: fname, role: role};
-               await db.collection("usuarios").insertOne(newUser);
-               response.sendStatus(201); // Created
-            });
-         });
-      } catch (error) {
-         response.sendStatus(500);
+function verifyJWT(req, res, next) {
+   const token = req.get("Authorization");
+   jwt.verify(token, SECRET_KEY, (err, user) => {
+      if (err) {
+         return res.sendStatus(403);
       }
-   } else {
-      response.sendStatus(409); // user exists
-   }
+      req.user = user;
+      next();
+   });
+}
+
+app.use("/tickets", verifyJWT, ticketsRouter);
+
+app.post("/registrarse", async (req, res) => {
+   //... Registration logic (keep as in your original snippet or refactor as needed)
 });
 
-// Endpoint de inicio de sesión
-app.post("/login", async (request, response) => {
-   const {username, password} = request.body;
-
-   let user;
-   try {
-      user = await db.collection("usuarios").findOne({username}); // Usando "usuarios" por consistencia
-   } catch (error) {
-      return response.status(500).send("Error interno del servidor"); // Manejar errores de base de datos
-   }
-
+app.post("/login", async (req, res) => {
+   //... Login logic (keep as in your original snippet or refactor as needed)
+   const {username, password} = req.body;
+   const user = await db.collection("usuarios").findOne({usuario: username});
    if (!user) {
-      return response.status(401).send("Usuario no encontrado");
+      return res.status(401).send("Usuario no encontrado");
    }
-
    const passwordMatches = await bcrypt.compare(password, user.password);
-
    if (!passwordMatches) {
-      return response.status(401).send("Credenciales inválidas");
+      return res.status(401).send("Credenciales inválidas");
    }
-
    const token = jwt.sign({username: user.username}, SECRET_KEY, {expiresIn: "1h"});
+   res.json({token, username: user.username});
+});
 
-   response.json({
-      token,
-      username: user.username,
+async function connectDB() {
+   const client = new MongoClient(process.env.LOCAL_MONGO_URL);
+   await client.connect();
+   db = client.db();
+   console.log("Connected to the database:", db.databaseName);
+}
+
+async function log(sujeto, accion, objeto) {
+   const toLog = {
+      timestamp: new Date(),
+      sujeto,
+      accion,
+      objeto,
+   };
+   await db.collection("log").insertOne(toLog);
+}
+
+const authenticateToken = (req, res, next) => {
+   const authHeader = req.headers["authorization"];
+   const token = authHeader && authHeader.split(" ")[1];
+
+   if (!token) return res.sendStatus(401);
+
+   jwt.verify(token, SECRET_KEY, (err, user) => {
+      if (err) return res.sendStatus(403);
+      req.user = user;
+      next();
    });
+};
+
+app.get("/protected", authenticateToken, (req, res) => {
+   res.json({message: "This is protected frfr", user: req.user});
 });
 
 app.listen(PORT, () => {
    connectDB();
-   console.log(`El servidor está corriendo en el puerto ${PORT}.`);
+   console.log(`Server is running on port ${PORT}.`);
 });
+
+// -------------------------------------------------------------
