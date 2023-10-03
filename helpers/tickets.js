@@ -6,11 +6,28 @@ export async function getTickets() {
 }
 
 export async function getTicketById(id) {
-   const ticket = await db.collection("tickets").findOne({id: Number(id)});
+   const ticket = await db.collection("tickets").findOne({_id: id});
    return ticket;
 }
 
-export async function createTicket(ticket) {
+export async function createTicket(info) {
+   const ticket = {...info};
+   // {
+   //    title, // required
+   //    categoryId, // required
+   //    subcategoryIndex, // required
+   //    priority, // required
+   //    intermediaries,
+   //    closingComment,
+   //    description,
+   //    classroomId,
+   //    status, // required
+   //    createdAt, // required
+   //    closedAt,
+   // }
+   ticket.closingComment = null;
+   ticket.closedAt = null;
+   ticket.createdAt = new Date();
    const result = await db.collection("tickets").insertOne(ticket);
    return result;
 }
