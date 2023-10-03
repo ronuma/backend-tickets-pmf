@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import {MongoClient} from "mongodb";
 import {PORT} from "./constants.js";
 import {ticketsRouter} from "./routes/tickets.js";
+import {categoriesRouter} from "./routes/categories.js";
 
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET; // env file
@@ -81,6 +82,15 @@ const authenticateToken = (req, res, next) => {
 app.get("/protected", authenticateToken, (req, res) => {
    res.json({message: "This is protected frfr", user: req.user});
 });
+
+app.get("/", (_req, res) => {
+   res.json({
+      msg: "API de tickets PMF",
+   });
+});
+
+app.use("/tickets", ticketsRouter);
+app.use("/categories", categoriesRouter);
 
 app.listen(PORT, () => {
    connectDB();
