@@ -43,7 +43,7 @@ router.get("/:id", async (req, res) => {
    }
 });
 
-router.post("/", validatePost, async (req, res) => {
+router.post("/", async (req, res) => {
    try {
       const result = await createTicket(req.body);
       res.json(result);
