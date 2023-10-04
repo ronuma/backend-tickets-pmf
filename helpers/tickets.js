@@ -25,8 +25,6 @@ export async function createTicket(info) {
    //    createdAt, // required
    //    closedAt,
    // }
-   ticket.closingComment = null;
-   ticket.closedAt = null;
    ticket.createdAt = new Date();
    const result = await db.collection("tickets").insertOne(ticket);
    return result;
