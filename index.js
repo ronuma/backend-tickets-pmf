@@ -81,7 +81,7 @@ app.post("/login", async (req, res) => {
 });
 
 async function connectDB() {
-   const client = new MongoClient(process.env.LOCAL_MONGO_URL);
+   const client = new MongoClient(process.env.MONGO_URL);
    await client.connect();
    db = client.db();
    console.log("Connected to the database:", db.databaseName);
