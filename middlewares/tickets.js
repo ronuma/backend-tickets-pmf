@@ -1,4 +1,5 @@
 // validacion de lo que debe contener la peticion al crear un ticket
+// se deja creado pero no están en uso porque no son requerimientos todavia
 export function validatePost(req, res, next) {
    const {
       title,
