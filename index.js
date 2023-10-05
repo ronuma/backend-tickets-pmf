@@ -7,6 +7,7 @@ import {MongoClient} from "mongodb";
 import {PORT} from "./constants.js";
 import {ticketsRouter} from "./routes/tickets.js";
 import {categoriesRouter} from "./routes/categories.js";
+import {reportsRouter} from "./routes/reports.js";
 
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET; // env file
@@ -18,7 +19,8 @@ app.use(express.json());
 app.use(cors());
 
 function verifyJWT(req, res, next) {
-   const token = req.get("Authorization");
+  const authHeader = req.headers["authorization"];
+   const token = authHeader && authHeader.split(" ")[1];
    jwt.verify(token, SECRET_KEY, (err, user) => {
       if (err) {
          return res.sendStatus(403);
@@ -27,6 +29,8 @@ function verifyJWT(req, res, next) {
       next();
    });
 }
+
+app.use("/reportes", verifyJWT, reportsRouter);
 
 app.use("/tickets", verifyJWT, ticketsRouter);
 
@@ -72,15 +76,15 @@ app.post("/login", async (req, res) => {
    if (!passwordMatches) {
       return res.status(401).send("Credenciales inválidas");
    }
-   const token = jwt.sign({username: user.username, role: user.role}, SECRET_KEY, {
+   const token = jwt.sign({username: user.usuario, role: user.role}, SECRET_KEY, {
       expiresIn: "1h",
    });
 
-   res.json({token, username: user.username});
+   res.json({token, username: user.usuario});
 });
 
 async function connectDB() {
-   const client = new MongoClient(process.env.LOCAL_MONGO_URL);
+   const client = new MongoClient(process.env.MONGO_URL);
    await client.connect();
    db = client.db();
    console.log("Connected to the database:", db.databaseName);
@@ -121,6 +125,7 @@ app.get("/", (_req, res) => {
 
 app.use("/tickets", ticketsRouter);
 app.use("/categories", categoriesRouter);
+app.use("/reports", reportsRouter);
 
 app.listen(PORT, () => {
    connectDB();
