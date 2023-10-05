@@ -56,7 +56,7 @@ router.post("/", async (req, res) => {
    }
 });
 
-router.put("/:id", validatePut, async (req, res) => {
+router.put("/:id", async (req, res) => {
    try {
       const {id} = req.params;
       const result = await updateTicket(id, req.body);
