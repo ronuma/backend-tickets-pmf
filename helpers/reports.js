@@ -10,11 +10,13 @@ import {db} from "../db.js";
 
 export const createReport = async () => {
   const dt = new Date();
-  const weekStart = dt.getDay();
-  const weekEnd = dt.getDay() - 7;
+  const weekStart = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() - dt.getDay());
+  const weekEnd = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + (6 - dt.getDay()));
+  const weekStartStr = weekStart.toISOString().split("T")[0];
+  const weekEndStr = weekEnd.toISOString().split("T")[0];
 
   const report = {
-    name: `Reporte de la semana ${weekStart} al ${weekEnd}`,
+    name: `Reporte de la semana ${weekStartStr} al ${weekEndStr}`,
     mostTicketsClassroom: await getMostTicketsClassroom(weekStart, weekEnd),
     leastTicketsClassroom: await getLeastTicketsClassroom(weekStart, weekEnd),
     avgClosureTime: await computeAvgClosureTime(weekStart, weekEnd),

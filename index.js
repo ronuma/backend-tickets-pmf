@@ -8,7 +8,6 @@ import {PORT} from "./constants.js";
 import {ticketsRouter} from "./routes/tickets.js";
 import {categoriesRouter} from "./routes/categories.js";
 import {reportsRouter} from "./routes/reports.js";
-import {isAula, isNacional, isEjecutivo} from "./middlewares/auth.js";
 
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET; // env file
