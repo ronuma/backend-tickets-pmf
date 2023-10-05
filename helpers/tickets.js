@@ -3,12 +3,16 @@ import {db} from "../db.js";
 // gets all tickets and returns them as an array
 export async function getTickets() {
    const data = await db.collection("tickets").find().toArray();
+   data.forEach(ticket => {
+      delete ticket._id;
+   });
    return data;
 }
 
 // gets an individual ticket by its id and returns it
 export async function getTicketById(id) {
    const ticket = await db.collection("tickets").findOne({id: Number(id)});
+   delete ticket._id;
    return ticket;
 }
 
@@ -31,7 +35,6 @@ export async function updateTicket(id, ticket) {
    const result = await db.collection("tickets").updateOne({id: Number(id)}, {$set: ticket});
    if (result.acknowledged) {
       const ticket = await getTicketById(id);
-      delete ticket._id;
       return ticket;
    }
    return undefined;
@@ -43,42 +46,52 @@ export async function deleteTicket(id) {
 }
 
 export async function getActiveTickets() {
-  const result = await db.collection("tickets").find({status: 1}).toArray();
-  return result;
+   const result = await db.collection("tickets").find({status: 1}).toArray();
+   return result;
 }
 
 export async function getNewTickets(weekStart, weekEnd) {
-  const result = await db.collection("tickets").aggregate([
-    {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
-    {$group: {_id: "$status", count: {$sum: 1}}}
-  ]).toArray();
-  return result;
+   const result = await db
+      .collection("tickets")
+      .aggregate([
+         {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
+         {$group: {_id: "$status", count: {$sum: 1}}},
+      ])
+      .toArray();
+   return result;
 }
 
 export async function getClosedTickets(weekStart, weekEnd) {
-  const result = await db.collection("tickets").aggregate([
-    {$match: {closedAt: {$gte: weekStart, $lte: weekEnd}}},
-    {$group: {_id: "$status", count: {$sum: 1}}}
-  ]).toArray();
-  return result;
+   const result = await db
+      .collection("tickets")
+      .aggregate([
+         {$match: {closedAt: {$gte: weekStart, $lte: weekEnd}}},
+         {$group: {_id: "$status", count: {$sum: 1}}},
+      ])
+      .toArray();
+   return result;
 }
 
 export async function getMostTicketsClassroom(weekStart, weekEnd) {
-  const result = await db.collection("tickets").aggregate([
-    {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
-    {$group: {_id: "$classroom", count: {$sum: 1}}},
-    {$sort: {count: -1}},
-    {$limit: 1}
-  ]);
-  return result;
+   const result = await db
+      .collection("tickets")
+      .aggregate([
+         {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
+         {$group: {_id: "$classroom", count: {$sum: 1}}},
+         {$sort: {count: -1}},
+         {$limit: 1},
+      ]);
+   return result;
 }
 
 export async function getLeastTicketsClassroom(weekStart, weekEnd) {
-  const result = await db.collection("tickets").aggregate([
-    {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
-    {$group: {_id: "$classroom", count: {$sum: 1}}},
-    {$sort: {count: 1}},
-    {$limit: 1}
-  ]);
-  return result;
+   const result = await db
+      .collection("tickets")
+      .aggregate([
+         {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
+         {$group: {_id: "$classroom", count: {$sum: 1}}},
+         {$sort: {count: 1}},
+         {$limit: 1},
+      ]);
+   return result;
 }
