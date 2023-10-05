@@ -29,7 +29,12 @@ export async function updateTicket(id, ticket) {
       ticket.closedAt = new Date();
    }
    const result = await db.collection("tickets").updateOne({id: Number(id)}, {$set: ticket});
-   return result;
+   if (result.acknowledged) {
+      const ticket = await getTicketById(id);
+      delete ticket._id;
+      return ticket;
+   }
+   return undefined;
 }
 
 export async function deleteTicket(id) {

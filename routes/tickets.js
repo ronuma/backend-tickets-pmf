@@ -57,15 +57,21 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-   if (req.user.role !== "Aula") {
-      return res.status(401).json({
-         msg: "No tienes permisos para actualizar tickets",
-      });
-   }
+   // if (req.user.role !== "Aula") {
+   //    return res.status(401).json({
+   //       msg: "No tienes permisos para actualizar tickets",
+   //    });
+   // }
    try {
       const {id} = req.params;
+      delete req.body._id;
       const result = await updateTicket(id, req.body);
-      res.json(result);
+      res.header('Access-Control-Allow-Origin', '*');
+      res.json({
+         msg: "Ticket actualizado correctamente",
+         data: result,
+      
+      });
    } catch (error) {
       console.log("PUT TICKET ERROR: ", error);
       res.status(500).json({
