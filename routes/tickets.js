@@ -6,7 +6,7 @@ import {
    updateTicket,
    deleteTicket,
 } from "../helpers/tickets.js";
-import {validatePost, validatePut} from "../middlewares/tickets.js";
+// import {validatePost, validatePut} from "../middlewares/tickets.js";
 
 const router = Router();
 
@@ -66,11 +66,10 @@ router.put("/:id", async (req, res) => {
       const {id} = req.params;
       delete req.body._id;
       const result = await updateTicket(id, req.body);
-      res.header('Access-Control-Allow-Origin', '*');
+      res.header("Access-Control-Allow-Origin", "*");
       res.json({
          msg: "Ticket actualizado correctamente",
          data: result,
-      
       });
    } catch (error) {
       console.log("PUT TICKET ERROR: ", error);
