@@ -4,6 +4,11 @@ import {createReport} from '../helpers/reports.js';
 const router = Router();
 
 router.post('/', async (req, res) => {
+  if (req.user.role === "Aula") {
+    return res.status(401).json({
+      msg: "No tienes permisos para crear reportes",
+    });
+  }
   try {
     // Get token
     const token = req.headers.authorization.split(" ")[1];
