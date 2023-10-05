@@ -30,9 +30,9 @@ function verifyJWT(req, res, next) {
    });
 }
 
-app.use("/reportes", verifyJWT, reportsRouter);
 
-app.use("/tickets", verifyJWT, ticketsRouter);
+// app.use("/tickets", verifyJWT, ticketsRouter);
+app.use("/reportes", verifyJWT, reportsRouter);
 
 app.post("/registrarse", async (request, response) => {
    let user = request.body.username;
