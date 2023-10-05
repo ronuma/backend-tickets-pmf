@@ -28,7 +28,7 @@ function verifyJWT(req, res, next) {
    });
 }
 
-app.use("/tickets", verifyJWT, ticketsRouter);
+// app.use("/tickets", verifyJWT, ticketsRouter);
 
 app.post("/registrarse", async (request, response) => {
    let user = request.body.username;

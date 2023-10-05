@@ -1,7 +1,11 @@
 import {db} from "../db.js";
 
 export async function getTickets() {
-   const data = await db.collection("tickets").find({}).project({_id: 0}).toArray();
+   const data = await db.collection("tickets").find().toArray();
+   data.forEach(ticket => {
+      ticket.id = ticket._id;
+      delete ticket._id;
+   });
    return data;
 }
 
