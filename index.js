@@ -8,6 +8,7 @@ import {PORT} from "./constants.js";
 import {ticketsRouter} from "./routes/tickets.js";
 import {categoriesRouter} from "./routes/categories.js";
 import {reportsRouter} from "./routes/reports.js";
+import {classroomsRouter} from "./routes/classrooms.js";
 
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET; // env file
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(cors());
 
 function verifyJWT(req, res, next) {
-  const authHeader = req.headers["authorization"];
+   const authHeader = req.headers["authorization"];
    const token = authHeader && authHeader.split(" ")[1];
    jwt.verify(token, SECRET_KEY, (err, user) => {
       if (err) {
@@ -29,7 +30,6 @@ function verifyJWT(req, res, next) {
       next();
    });
 }
-
 
 // app.use("/tickets", verifyJWT, ticketsRouter);
 app.use("/reportes", verifyJWT, reportsRouter);
@@ -126,6 +126,7 @@ app.get("/", (_req, res) => {
 app.use("/tickets", ticketsRouter);
 app.use("/categories", categoriesRouter);
 app.use("/reports", reportsRouter);
+app.use("/classrooms", classroomsRouter);
 
 app.listen(PORT, () => {
    connectDB();
