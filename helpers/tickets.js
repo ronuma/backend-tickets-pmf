@@ -78,6 +78,8 @@ export async function getMostTicketsClassroom(weekStart, weekEnd) {
       .aggregate([
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
           {$group: {_id: "$classroomId", count: {$sum: 1}}},
+          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
+          {$group: {_id: "$classroom.name", count: {$sum: 1}}},
           {$sort: {count: 1}},
           {$limit: 1},
       ]).toArray();
@@ -91,6 +93,8 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
       .aggregate([
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
          {$group: {_id: "$classroomId", count: {$sum: 1}}},
+          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
+          {$group: {_id: "$classroom.name", count: {$sum: 1}}},
           {$sort: {count: -1}},
          {$limit: 1},
       ]).toArray();
