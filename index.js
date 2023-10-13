@@ -23,6 +23,7 @@ function verifyJWT(req, res, next) {
    const authHeader = req.headers["authorization"];
    const token = authHeader && authHeader.split(" ")[1];
    jwt.verify(token, SECRET_KEY, (err, user) => {
+      console.log(err)
       if (err) {
          return res.sendStatus(403);
       }
