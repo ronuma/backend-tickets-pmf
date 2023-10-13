@@ -9,6 +9,9 @@ import {db} from "../db.js";
 
 export const getReports = async () => {
    const reports = await db.collection("reports").find({}).toArray();
+   reports.forEach(report => {
+      delete report._id;
+   });
    return reports;
 };
 
@@ -29,6 +32,7 @@ export const createReport = async () => {
       closedTickets: await getClosedTickets(weekStart, weekEnd),
    };
 
+   report.id = (await db.collection("reports").countDocuments()) + 1;
    db.collection("reports").insertOne(report);
 };
 
