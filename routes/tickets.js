@@ -12,7 +12,14 @@ const router = Router();
 
 router.get("/", async (_req, res) => {
    try {
-      const data = await getTickets();
+      const allData = await getTickets();
+      const q = _req.query.q;
+      let data = allData;
+      if (q) {
+         data = data.filter(ticket => 
+            ticket.title.includes(q) // Replace with the actual fields and conditions // you want to search on.
+         );
+      }
       res.setHeader("Content-Range", `tickets 0-${data.length}/${data.length}`);
       res.json(data);
    } catch (error) {
