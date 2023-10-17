@@ -28,9 +28,6 @@ router.post("/", async (req, res) => {
       });
    }
    try {
-      // Get token
-      const token = req.headers.authorization.split(" ")[1];
-
       const report = await createReport();
       res.status(201).json({
          msg: "Reporte creado",
