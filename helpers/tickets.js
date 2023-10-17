@@ -77,10 +77,13 @@ export async function getMostTicketsClassroom(weekStart, weekEnd) {
       .collection("tickets")
       .aggregate([
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
-         {$group: {_id: "$classroom", count: {$sum: 1}}},
-         {$sort: {count: -1}},
-         {$limit: 1},
-      ]);
+          {$group: {_id: "$classroomId", count: {$sum: 1}}},
+          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
+          {$group: {_id: "$classroom.name", count: {$sum: 1}}},
+          {$sort: {count: 1}},
+          {$limit: 1},
+      ]).toArray();
+  console.log(result)
    return result;
 }
 
@@ -89,9 +92,12 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
       .collection("tickets")
       .aggregate([
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
-         {$group: {_id: "$classroom", count: {$sum: 1}}},
-         {$sort: {count: 1}},
+         {$group: {_id: "$classroomId", count: {$sum: 1}}},
+          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
+          {$group: {_id: "$classroom.name", count: {$sum: 1}}},
+          {$sort: {count: -1}},
          {$limit: 1},
-      ]);
+      ]).toArray();
+  console.log(result);
    return result;
 }
