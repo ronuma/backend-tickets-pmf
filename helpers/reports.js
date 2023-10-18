@@ -30,10 +30,22 @@ export const createReport = async () => {
       activeTickets: await getActiveTickets(),
       newTickets: await getNewTickets(weekStart, weekEnd),
       closedTickets: await getClosedTickets(weekStart, weekEnd),
+      updated: new Date(),
    };
 
-   report.id = (await db.collection("reports").countDocuments()) + 1;
-   db.collection("reports").insertOne(report);
+   // check if there is a report for this week
+   const lastReport = await db.collection("reports").findOne({name: report.name});
+   // if there is a report for this week, update it only
+   if (lastReport !== null) {
+      await db.collection("reports").updateOne({id: lastReport.id}, {$set: report});
+      return;
+      // if there is no report for this week, create a new one
+   } else {
+      // get the last report's id and add 1 to it
+      const lastReportForId = await db.collection("reports").findOne({}, {sort: {id: -1}});
+      report.id = lastReportForId ? lastReportForId.id + 1 : 1;
+      db.collection("reports").insertOne(report);
+   }
 };
 
 export const computeAvgClosureTime = async (weekStart, weekEnd) => {

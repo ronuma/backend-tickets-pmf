@@ -21,7 +21,9 @@ export async function createTicket(info) {
    const ticket = {...info};
    // insert created date and id
    ticket.createdAt = new Date();
-   ticket.id = (await db.collection("tickets").countDocuments()) + 1;
+   // get the last id and add 1
+   const lastTicket = await db.collection("tickets").findOne({}, {sort: {id: -1}});
+   ticket.id = lastTicket ? lastTicket.id + 1 : 1;
    const result = await db.collection("tickets").insertOne(ticket);
    return result;
 }
