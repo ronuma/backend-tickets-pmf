@@ -14,7 +14,7 @@ const router = Router();
 router.get("/", async (req, res) => {
    try {
       const allData = await getTickets();
-      const q = _req.query.q;
+      const q = req.query.q;
       let data = allData;
       if (q) {
          data = data.filter(
