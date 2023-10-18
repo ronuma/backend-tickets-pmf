@@ -85,7 +85,7 @@ export async function getMostTicketsClassroom(weekStart, weekEnd) {
           {$sort: {count: 1}},
           {$limit: 1},
       ]).toArray();
-  console.log(result)
+
    return result;
 }
 
@@ -100,6 +100,16 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
           {$sort: {count: -1}},
          {$limit: 1},
       ]).toArray();
-  console.log(result);
+
    return result;
 }
+
+export async function deleteTickets(ids) {
+   const deletedIds = [];
+   for(let id of ids) {
+       await deleteTicket(id); 
+       deletedIds.push(id);
+   }
+   return deletedIds;
+}
+

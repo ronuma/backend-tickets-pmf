@@ -5,6 +5,7 @@ import {
    createTicket,
    updateTicket,
    deleteTicket,
+   deleteTickets
 } from "../helpers/tickets.js";
 // import {validatePost, validatePut} from "../middlewares/tickets.js";
 
@@ -87,6 +88,7 @@ router.put("/:id", async (req, res) => {
    }
 });
 
+
 router.delete("/:id", async (req, res) => {
    if (req.user.role !== "Aula") {
       return res.status(401).json({
@@ -106,5 +108,28 @@ router.delete("/:id", async (req, res) => {
       });
    }
 });
+
+router.delete("/", async (req, res) => {
+   if (req.user.role !== "Aula") {
+       return res.status(401).json({
+           msg: "No tienes permisos para eliminar tickets",
+       });
+   }
+   try {
+       const ids = JSON.parse(req.query.id || "[]"); 
+       const results = await deleteTickets(ids);
+       res.json({ data: results}); 
+   } catch (error) {
+       console.log("DELETE MANY TICKETS ERROR: ", error);
+       res.status(500).json({
+           msg: "Error al eliminar los tickets",
+           error,
+       });
+   }
+});
+
+
+
+
 
 export {router as ticketsRouter};
