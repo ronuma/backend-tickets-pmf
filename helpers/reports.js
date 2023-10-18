@@ -16,6 +16,13 @@ export const getReports = async () => {
    return reports;
 };
 
+export const getReportById = async id => {
+  const report = await db.collection("reports").findOne({id});
+  console.log("report: ", report);
+  delete report._id;
+  return report;
+};
+
 export const createReport = async () => {
    const dt = new Date();
    const weekStart = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() - dt.getDay());
