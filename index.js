@@ -4,7 +4,6 @@ import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {MongoClient} from "mongodb";
-import {PORT} from "./constants.js";
 import {ticketsRouter} from "./routes/tickets.js";
 import {categoriesRouter} from "./routes/categories.js";
 import {reportsRouter} from "./routes/reports.js";
@@ -12,12 +11,41 @@ import {classroomsRouter} from "./routes/classrooms.js";
 
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET; // env file
+const PORT = process.env.port || 8080;
 
+// function to connect to mongo db
 let db;
+async function connectDB() {
+   const client = new MongoClient(process.env.MONGO_URL);
+   await client.connect();
+   db = client.db();
+   console.log("Connected to the database:", db.databaseName);
+}
 
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+app.get("/", (_req, res) => {
+   res.json({
+      msg: "API de tickets PMF",
+   });
+});
+
+app.use("/tickets", verifyJWT, ticketsRouter);
+app.use("/reports", verifyJWT, reportsRouter);
+app.use("/categories", verifyJWT, categoriesRouter);
+app.use("/classrooms", verifyJWT, classroomsRouter);
+
+async function log(sujeto, accion, objeto) {
+   const toLog = {
+      timestamp: new Date(),
+      sujeto,
+      accion,
+      objeto,
+   };
+   await db.collection("log").insertOne(toLog);
+}
 
 function verifyJWT(req, res, next) {
    const authHeader = req.headers["authorization"];
@@ -31,24 +59,18 @@ function verifyJWT(req, res, next) {
    });
 }
 
-app.use("/tickets", verifyJWT, ticketsRouter);
-app.use("/reports", verifyJWT, reportsRouter);
-app.use("/categories", verifyJWT, categoriesRouter);
-app.use("/classrooms", verifyJWT, classroomsRouter);
-
 app.post("/registrarse", async (request, response) => {
    let user = request.body.username;
    let pass = request.body.password;
    let fname = request.body.fullName;
    let role = request.body.role;
-
    const validRoles = ["Aula", "Nacional", "Ejecutivo"];
    if (!validRoles.includes(role)) {
       return response.status(400).send("Rol inválido");
    }
 
    let existingUser = await db.collection("usuarios").findOne({usuario: user});
-
+   log(request.user.username, "registrarse", user);
    if (existingUser == null) {
       try {
          bcrypt.genSalt(10, (error, salt) => {
@@ -85,53 +107,7 @@ app.post("/login", async (req, res) => {
    res.json({token, username: user.usuario});
 });
 
-async function connectDB() {
-   const client = new MongoClient(process.env.MONGO_URL);
-   await client.connect();
-   db = client.db();
-   console.log("Connected to the database:", db.databaseName);
-}
-
-async function log(sujeto, accion, objeto) {
-   const toLog = {
-      timestamp: new Date(),
-      sujeto,
-      accion,
-      objeto,
-   };
-   await db.collection("log").insertOne(toLog);
-}
-
-const authenticateToken = (req, res, next) => {
-   const authHeader = req.headers["authorization"];
-   const token = authHeader && authHeader.split(" ")[1];
-
-   if (!token) return res.sendStatus(401);
-
-   jwt.verify(token, SECRET_KEY, (err, user) => {
-      if (err) return res.sendStatus(403);
-      req.user = user;
-      next();
-   });
-};
-
-app.get("/protected", authenticateToken, (req, res) => {
-   res.json({message: "This is protected frfr", user: req.user});
-});
-
-app.get("/", (_req, res) => {
-   res.json({
-      msg: "API de tickets PMF",
-   });
-});
-
-// ---- posiblemente deprecadas ----
-// app.use("/tickets", ticketsRouter);
-// app.use("/reports", reportsRouter);
-
 app.listen(PORT, () => {
    connectDB();
    console.log(`Server is running on port ${PORT}.`);
 });
-
-// -------------------------------------------------------------
