@@ -114,7 +114,6 @@ export async function getMostTicketsClassroom(weekStart, weekEnd) {
          {$limit: 1},
       ])
       .toArray();
-
    return result;
 }
 
@@ -130,7 +129,6 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
          {$limit: 1},
       ])
       .toArray();
-
    return result;
 }
 
@@ -139,32 +137,11 @@ export async function getAverageClosureTime(weekStart, weekEnd) {
       .collection("tickets")
       .aggregate([
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}, closedAt: {$exists: true}}},
-
-         {
-            $addFields: {
-               closureTime: {
-                  $subtract: ["$closedAt", "$createdAt"],
-               },
-            },
-         },
-
-         {
-            $group: {
-               _id: null,
-               averageClosureTime: {$avg: "$closureTime"},
-            },
-         },
-
-         {
-            $addFields: {
-               averageClosureTimeInMinutes: {
-                  $divide: ["$averageClosureTime", 1000 * 60],
-               },
-            },
-         },
+         {$addFields: {closureTime: {$subtract: ["$closedAt", "$createdAt"]}}},
+         {$group: {_id: null, averageClosureTime: {$avg: "$closureTime"}}},
+         {$addFields: {averageClosureTimeInMinutes: {$divide: ["$averageClosureTime", 1000 * 60]}}},
       ])
       .toArray();
-
    return result;
 }
 
