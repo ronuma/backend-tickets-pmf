@@ -41,7 +41,9 @@ export const createReport = async () => {
       return;
       // if there is no report for this week, create a new one
    } else {
-      report.id = (await db.collection("reports").countDocuments()) + 1;
+      // get the last report's id and add 1 to it
+      const lastReportForId = await db.collection("reports").findOne({}, {sort: {id: -1}});
+      report.id = lastReportForId ? lastReportForId.id + 1 : 1;
       db.collection("reports").insertOne(report);
    }
 };
