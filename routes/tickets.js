@@ -65,7 +65,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-   if (req.user.role !== "Aula") {
+   if (req.user.role == "Aula") {
       return res.status(401).json({
          msg: "No tienes permisos para actualizar tickets",
       });
