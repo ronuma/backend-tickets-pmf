@@ -90,7 +90,7 @@ router.put("/:id", async (req, res) => {
 
 
 router.delete("/:id", async (req, res) => {
-   if (req.user.role !== "Aula") {
+   if (req.user.role == "Aula") {
       return res.status(401).json({
          msg: "No tienes permisos para actualizar tickets",
       });
@@ -110,7 +110,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.delete("/", async (req, res) => {
-   if (req.user.role !== "Aula") {
+   if (req.user.role == "Aula") {
        return res.status(401).json({
            msg: "No tienes permisos para eliminar tickets",
        });
