@@ -7,15 +7,15 @@ export async function getClassrooms() {
    for (const classroom of data) {
       const ticketObjs = [];
       delete classroom._id;
-    if (classroom.tickets) {
-      for (const ticket of classroom.tickets) {
-        let ticketObj = await getTicketById(ticket);
-        if (ticketObj) {
-          ticketObjs.push(ticketObj);
-        }
+      if (classroom.tickets) {
+         for (const ticket of classroom.tickets) {
+            let ticketObj = await getTicketById(ticket);
+            if (ticketObj) {
+               ticketObjs.push(ticketObj);
+            }
+         }
+         classroom.tickets = ticketObjs;
       }
-      classroom.tickets = ticketObjs;
-    }
    }
 
    return data;
@@ -42,15 +42,25 @@ export async function createClassroom(info) {
    return result;
 }
 
-export async function editClassroom(info) {
-   const classroom = {...info};
-   const result = await db
-      .collection("classrooms")
-      .updateOne({id: Number(classroom.id)}, {$set: classroom});
-   return result;
+export async function editClassroom(id, classroom) {
+   const result = await db.collection("classrooms").updateOne({id: Number(id)}, {$set: classroom});
+   if (result.acknowledged) {
+      const classroom = await getClassroomById(id);
+      return classroom;
+   }
+   return undefined;
 }
 
 export async function deleteClassroom(id) {
    const result = await db.collection("classrooms").deleteOne({id: Number(id)});
    return result;
+}
+
+export async function deleteClassrooms(ids) {
+   const deletedIds = [];
+   for (let id of ids) {
+      await deleteClassroom(id);
+      deletedIds.push(id);
+   }
+   return deletedIds;
 }

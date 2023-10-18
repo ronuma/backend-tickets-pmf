@@ -65,7 +65,6 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-
    if (req.user.role == "Aula") {
       return res.status(401).json({
          msg: "No tienes permisos para actualizar tickets",
@@ -90,7 +89,6 @@ router.put("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-
    if (req.user.role == "Aula") {
       return res.status(401).json({
          msg: "No tienes permisos para actualizar tickets",
@@ -98,7 +96,6 @@ router.delete("/:id", async (req, res) => {
    }
    try {
       const {id} = req.params;
-      console.log("id", id);
       const result = await deleteTicket(id);
       res.json(result);
    } catch (error) {
@@ -111,11 +108,10 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.delete("/", async (req, res) => {
-
    if (req.user.role == "Aula") {
-       return res.status(401).json({
-           msg: "No tienes permisos para eliminar tickets",
-       });
+      return res.status(401).json({
+         msg: "No tienes permisos para eliminar tickets",
+      });
    }
    try {
       const ids = JSON.parse(req.query.id || "[]");

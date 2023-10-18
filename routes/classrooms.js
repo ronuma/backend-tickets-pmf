@@ -5,6 +5,7 @@ import {
    createClassroom,
    editClassroom,
    deleteClassroom,
+   deleteClassrooms,
 } from "../helpers/classrooms.js";
 
 const router = Router();
@@ -85,6 +86,25 @@ router.delete("/:id", async (req, res) => {
       console.log("DELETE CLASSROOM ERROR: ", error);
       res.status(500).json({
          msg: "Error al eliminar la aula con id " + req.params.id,
+         error,
+      });
+   }
+});
+
+router.delete("/", async (req, res) => {
+   if (req.user.role === "Aula") {
+      return res.status(403).json({
+         msg: "No tienes permisos para eliminar aulas",
+      });
+   }
+   try {
+      const ids = JSON.parse(req.query.id || "[]");
+      const results = await deleteClassrooms(ids);
+      res.json({data: results});
+   } catch (error) {
+      console.log("DELETE MANY CLASSROOMS ERROR: ", error);
+      res.status(500).json({
+         msg: "Error al eliminar las aulas",
          error,
       });
    }
