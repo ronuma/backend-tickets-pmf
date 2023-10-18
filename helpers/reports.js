@@ -4,6 +4,7 @@ import {
    getActiveTickets,
    getNewTickets,
    getClosedTickets,
+  getAverageClosureTime,
 } from "./tickets.js";
 import {db} from "../db.js";
 
@@ -26,7 +27,8 @@ export const createReport = async () => {
       name: `Reporte de la semana ${weekStartStr} al ${weekEndStr}`,
       mostTicketsClassroom: await getMostTicketsClassroom(weekStart, weekEnd),
       leastTicketsClassroom: await getLeastTicketsClassroom(weekStart, weekEnd),
-      avgClosureTime: await computeAvgClosureTime(weekStart, weekEnd),
+      avgClosureTime: await getAverageClosureTime(weekStart, weekEnd),
+      // avgClosureTime: await computeAvgClosureTime(weekStart, weekEnd),
       activeTickets: await getActiveTickets(),
       newTickets: await getNewTickets(weekStart, weekEnd),
       closedTickets: await getClosedTickets(weekStart, weekEnd),

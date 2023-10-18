@@ -55,22 +55,28 @@ export async function getActiveTickets() {
 export async function getNewTickets(weekStart, weekEnd) {
    const result = await db
       .collection("tickets")
-      .aggregate([
-         {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
-         {$group: {_id: "$status", count: {$sum: 1}}},
-      ])
-      .toArray();
+      .aggregate([{$group: {
+      _id: null,
+      newTickets: {$sum: { $cond: {
+        if: {$gte: ["$createdAt", weekStart]},
+        then: 1,
+        else: 0
+      }}}
+    }}]).toArray();
    return result;
 }
 
 export async function getClosedTickets(weekStart, weekEnd) {
    const result = await db
       .collection("tickets")
-      .aggregate([
-         {$match: {closedAt: {$gte: weekStart, $lte: weekEnd}}},
-         {$group: {_id: "$status", count: {$sum: 1}}},
-      ])
-      .toArray();
+      .aggregate([{$group: {
+      _id: null,
+      closedTickets: {$sum: { $cond: {
+        if: {$gte: ["$closedAt", weekStart]},
+        then: 1,
+        else:0
+      }}}
+    }}]).toArray();
    return result;
 }
 
@@ -81,7 +87,7 @@ export async function getMostTicketsClassroom(weekStart, weekEnd) {
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
          {$group: {_id: "$classroomId", count: {$sum: 1}}},
          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
-         {$group: {_id: "$classroom.name", count: {$sum: 1}}},
+         {$group: {_id: {id:"$classroom.id", name:"$classroom.name"}, count: {$sum: 1}}},
          {$sort: {count: 1}},
          {$limit: 1},
       ])
@@ -97,13 +103,47 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
          {$group: {_id: "$classroomId", count: {$sum: 1}}},
          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
-         {$group: {_id: "$classroom.name", count: {$sum: 1}}},
+         {$group: {_id: {id:"$classroom.id", name:"$classroom.name"}, count: {$sum: 1}}},
          {$sort: {count: -1}},
          {$limit: 1},
       ])
       .toArray();
 
    return result;
+}
+
+export async function getAverageClosureTime(weekStart, weekEnd) {
+    const result = await db
+        .collection("tickets")
+        .aggregate([
+            {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}, closedAt: {$exists: true}}},
+
+            {
+                $addFields: {
+                    closureTime: {
+                        $subtract: ["$closedAt", "$createdAt"]
+                    }
+                }
+            },
+
+            {
+                $group: {
+                    _id: null,
+                    averageClosureTime: {$avg: "$closureTime"}
+                }
+            },
+
+            {
+                $addFields: {
+                    averageClosureTimeInMinutes: {
+                        $divide: ["$averageClosureTime", 1000 * 60]
+                    }
+                }
+            }
+        ])
+        .toArray();
+
+    return result;
 }
 
 export async function deleteTickets(ids) {

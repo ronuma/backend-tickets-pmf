@@ -7,10 +7,15 @@ export async function getClassrooms() {
    for (const classroom of data) {
       const ticketObjs = [];
       delete classroom._id;
+    if (classroom.tickets) {
       for (const ticket of classroom.tickets) {
-         ticketObjs.push(await getTicketById(ticket));
+        let ticketObj = await getTicketById(ticket);
+        if (ticketObj) {
+          ticketObjs.push(ticketObj);
+        }
       }
       classroom.tickets = ticketObjs;
+    }
    }
 
    return data;
