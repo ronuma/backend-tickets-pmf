@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {createReport, getReports, getReportById} from "../helpers/reports.js";
+import {log} from "../index.js";
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.get("/", async (req, res) => {
    }
    try {
       const reports = await getReports();
+      log(req.user.username, "GET REPORTS", "OK");
       res.status(200).json(reports);
    } catch (error) {
       console.log("GET REPORTS ERROR: ", error);
@@ -22,22 +24,23 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  if (req.user.role === "Aula") {
+   if (req.user.role === "Aula") {
       return res.status(401).json({
          msg: "No tienes permisos para ver reportes",
       });
    }
-  try {
-    const id = parseInt(req.params.id);
-    const report = await getReportById(id);
-    res.status(200).json(report);
-  } catch (error) {
-    console.log("GET REPORT ERROR: ", error);
-    res.status(500).json({
-      msg: "Error al obtener el reporte",
-      error,
-    });
-  }
+   try {
+      const id = parseInt(req.params.id);
+      const report = await getReportById(id);
+      log(req.user.username, "GET REPORT BY ID", id);
+      res.status(200).json(report);
+   } catch (error) {
+      console.log("GET REPORT ERROR: ", error);
+      res.status(500).json({
+         msg: "Error al obtener el reporte",
+         error,
+      });
+   }
 });
 
 router.post("/", async (req, res) => {
@@ -48,6 +51,7 @@ router.post("/", async (req, res) => {
    }
    try {
       const report = await createReport();
+      log(req.user.username, "CREATE REPORT", report.id);
       res.status(201).json({
          msg: "Reporte creado",
          report,

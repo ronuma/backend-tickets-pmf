@@ -7,11 +7,11 @@ import {
    deleteTicket,
    deleteTickets,
 } from "../helpers/tickets.js";
-// import {validatePost, validatePut} from "../middlewares/tickets.js";
+import {log} from "../index.js";
 
 const router = Router();
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
    try {
       const allData = await getTickets();
       const q = _req.query.q;
@@ -22,6 +22,7 @@ router.get("/", async (_req, res) => {
          );
       }
       res.setHeader("Content-Range", `tickets 0-${data.length}/${data.length}`);
+      log(req.user.username, "GET TICKETS", "OK");
       res.json(data);
    } catch (error) {
       console.log("GET TICKETS ERROR: ", error);
@@ -41,6 +42,7 @@ router.get("/:id", async (req, res) => {
             msg: "Ticket no encontrado",
          });
       }
+      log(req.user.username, "GET TICKET BY ID", id);
       res.json(ticket);
    } catch (error) {
       console.log("GET TICKET BY ID ERROR: ", error);
@@ -54,6 +56,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
    try {
       const result = await createTicket(req.body);
+      log(req.user.username, "CREATE TICKET", result.id);
       res.json(result);
    } catch (error) {
       console.log("POST TICKET ERROR: ", error);
@@ -74,6 +77,7 @@ router.put("/:id", async (req, res) => {
       const {id} = req.params;
       delete req.body._id;
       const result = await updateTicket(id, req.body);
+      log(req.user.username, "UPDATE TICKET", id);
       res.header("Access-Control-Allow-Origin", "*");
       res.json({
          msg: "Ticket actualizado correctamente",
@@ -97,6 +101,7 @@ router.delete("/:id", async (req, res) => {
    try {
       const {id} = req.params;
       const result = await deleteTicket(id);
+      log(req.user.username, "DELETE TICKET", id);
       res.json(result);
    } catch (error) {
       console.log("DELETE TICKET ERROR: ", error);
@@ -116,6 +121,7 @@ router.delete("/", async (req, res) => {
    try {
       const ids = JSON.parse(req.query.id || "[]");
       const results = await deleteTickets(ids);
+      log(req.user.username, "DELETE MANY TICKETS", ids);
       res.json({data: results});
    } catch (error) {
       console.log("DELETE MANY TICKETS ERROR: ", error);

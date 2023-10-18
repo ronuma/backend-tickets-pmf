@@ -25,7 +25,11 @@ export async function createTicket(info) {
    const lastTicket = await db.collection("tickets").findOne({}, {sort: {id: -1}});
    ticket.id = lastTicket ? lastTicket.id + 1 : 1;
    const result = await db.collection("tickets").insertOne(ticket);
-   return result;
+   if (result.acknowledged) {
+      const newTicket = await getTicketById(ticket.id);
+      return newTicket;
+   }
+   return undefined;
 }
 
 export async function updateTicket(id, ticket) {
@@ -55,28 +59,46 @@ export async function getActiveTickets() {
 export async function getNewTickets(weekStart, weekEnd) {
    const result = await db
       .collection("tickets")
-      .aggregate([{$group: {
-      _id: null,
-      newTickets: {$sum: { $cond: {
-        if: {$gte: ["$createdAt", weekStart]},
-        then: 1,
-        else: 0
-      }}}
-    }}]).toArray();
+      .aggregate([
+         {
+            $group: {
+               _id: null,
+               newTickets: {
+                  $sum: {
+                     $cond: {
+                        if: {$gte: ["$createdAt", weekStart]},
+                        then: 1,
+                        else: 0,
+                     },
+                  },
+               },
+            },
+         },
+      ])
+      .toArray();
    return result;
 }
 
 export async function getClosedTickets(weekStart, weekEnd) {
    const result = await db
       .collection("tickets")
-      .aggregate([{$group: {
-      _id: null,
-      closedTickets: {$sum: { $cond: {
-        if: {$gte: ["$closedAt", weekStart]},
-        then: 1,
-        else:0
-      }}}
-    }}]).toArray();
+      .aggregate([
+         {
+            $group: {
+               _id: null,
+               closedTickets: {
+                  $sum: {
+                     $cond: {
+                        if: {$gte: ["$closedAt", weekStart]},
+                        then: 1,
+                        else: 0,
+                     },
+                  },
+               },
+            },
+         },
+      ])
+      .toArray();
    return result;
 }
 
@@ -87,7 +109,7 @@ export async function getMostTicketsClassroom(weekStart, weekEnd) {
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
          {$group: {_id: "$classroomId", count: {$sum: 1}}},
          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
-         {$group: {_id: {id:"$classroom.id", name:"$classroom.name"}, count: {$sum: 1}}},
+         {$group: {_id: {id: "$classroom.id", name: "$classroom.name"}, count: {$sum: 1}}},
          {$sort: {count: 1}},
          {$limit: 1},
       ])
@@ -103,7 +125,7 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
          {$group: {_id: "$classroomId", count: {$sum: 1}}},
          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
-         {$group: {_id: {id:"$classroom.id", name:"$classroom.name"}, count: {$sum: 1}}},
+         {$group: {_id: {id: "$classroom.id", name: "$classroom.name"}, count: {$sum: 1}}},
          {$sort: {count: -1}},
          {$limit: 1},
       ])
@@ -113,37 +135,37 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
 }
 
 export async function getAverageClosureTime(weekStart, weekEnd) {
-    const result = await db
-        .collection("tickets")
-        .aggregate([
-            {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}, closedAt: {$exists: true}}},
+   const result = await db
+      .collection("tickets")
+      .aggregate([
+         {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}, closedAt: {$exists: true}}},
 
-            {
-                $addFields: {
-                    closureTime: {
-                        $subtract: ["$closedAt", "$createdAt"]
-                    }
-                }
+         {
+            $addFields: {
+               closureTime: {
+                  $subtract: ["$closedAt", "$createdAt"],
+               },
             },
+         },
 
-            {
-                $group: {
-                    _id: null,
-                    averageClosureTime: {$avg: "$closureTime"}
-                }
+         {
+            $group: {
+               _id: null,
+               averageClosureTime: {$avg: "$closureTime"},
             },
+         },
 
-            {
-                $addFields: {
-                    averageClosureTimeInMinutes: {
-                        $divide: ["$averageClosureTime", 1000 * 60]
-                    }
-                }
-            }
-        ])
-        .toArray();
+         {
+            $addFields: {
+               averageClosureTimeInMinutes: {
+                  $divide: ["$averageClosureTime", 1000 * 60],
+               },
+            },
+         },
+      ])
+      .toArray();
 
-    return result;
+   return result;
 }
 
 export async function deleteTickets(ids) {

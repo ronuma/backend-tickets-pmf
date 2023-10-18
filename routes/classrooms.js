@@ -7,13 +7,15 @@ import {
    deleteClassroom,
    deleteClassrooms,
 } from "../helpers/classrooms.js";
+import {log} from "../index.js";
 
 const router = Router();
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
    try {
       const data = await getClassrooms();
       res.setHeader("Content-Range", `classrooms 0-${data.length}/${data.length}`);
+      log(req.user.username, "GET CLASSROOMS", "OK");
       res.json(data);
    } catch (error) {
       console.log("GET CLASSROOMS ERROR: ", error);
@@ -27,6 +29,7 @@ router.get("/", async (_req, res) => {
 router.get("/:id", async (req, res) => {
    try {
       const data = await getClassroomById(req.params.id);
+      log(req.user.username, "GET CLASSROOM BY ID", req.params.id);
       res.json(data);
    } catch (error) {
       console.log("GET CLASSROOM BY ID ERROR: ", error);
@@ -45,6 +48,7 @@ router.post("/", async (req, res) => {
    }
    try {
       const data = await createClassroom(req.body);
+      log(req.user.username, "CREATE CLASSROOM", data.id);
       res.json(data);
    } catch (error) {
       console.log("CREATE CLASSROOM ERROR: ", error);
@@ -63,6 +67,7 @@ router.put("/:id", async (req, res) => {
    }
    try {
       const data = await editClassroom(req.params.id, req.body);
+      log(req.user.username, "UPDATE CLASSROOM", req.params.id);
       res.json(data);
    } catch (error) {
       console.log("UPDATE CLASSROOM ERROR: ", error);
@@ -81,6 +86,7 @@ router.delete("/:id", async (req, res) => {
    }
    try {
       const data = await deleteClassroom(req.params.id);
+      log(req.user.username, "DELETE CLASSROOM", req.params.id);
       res.json(data);
    } catch (error) {
       console.log("DELETE CLASSROOM ERROR: ", error);
@@ -100,6 +106,7 @@ router.delete("/", async (req, res) => {
    try {
       const ids = JSON.parse(req.query.id || "[]");
       const results = await deleteClassrooms(ids);
+      log(req.user.username, "DELETE MANY CLASSROOMS", ids);
       res.json({data: results});
    } catch (error) {
       console.log("DELETE MANY CLASSROOMS ERROR: ", error);

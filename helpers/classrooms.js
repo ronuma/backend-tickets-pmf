@@ -4,20 +4,9 @@ import {getTicketById} from "./tickets.js";
 // gets all classrooms and returns them as an array
 export async function getClassrooms() {
    const data = await db.collection("classrooms").find().toArray();
-   for (const classroom of data) {
-      const ticketObjs = [];
+   data.forEach(classroom => {
       delete classroom._id;
-      if (classroom.tickets) {
-         for (const ticket of classroom.tickets) {
-            let ticketObj = await getTicketById(ticket);
-            if (ticketObj) {
-               ticketObjs.push(ticketObj);
-            }
-         }
-         classroom.tickets = ticketObjs;
-      }
-   }
-
+   });
    return data;
 }
 
@@ -25,11 +14,6 @@ export async function getClassrooms() {
 export async function getClassroomById(id) {
    const classroom = await db.collection("classrooms").findOne({id: Number(id)});
    delete classroom._id;
-   const ticketObjs = [];
-   for (const ticket of classroom.tickets) {
-      ticketObjs.push(await getTicketById(ticket));
-   }
-   classroom.tickets = ticketObjs;
    return classroom;
 }
 
@@ -39,7 +23,11 @@ export async function createClassroom(info) {
    const lastClassroom = await db.collection("classrooms").findOne({}, {sort: {id: -1}});
    classroom.id = lastClassroom ? lastClassroom.id + 1 : 1;
    const result = await db.collection("classrooms").insertOne(classroom);
-   return result;
+   if (result.acknowledged) {
+      const newClassroom = await getClassroomById(classroom.id);
+      return newClassroom;
+   }
+   return undefined;
 }
 
 export async function editClassroom(id, classroom) {

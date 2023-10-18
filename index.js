@@ -28,7 +28,7 @@ app.use("/reports", verifyJWT, reportsRouter);
 app.use("/categories", verifyJWT, categoriesRouter);
 app.use("/classrooms", verifyJWT, classroomsRouter);
 
-async function log(sujeto, accion, objeto) {
+export async function log(sujeto, accion, objeto) {
    const toLog = {
       timestamp: new Date(),
       sujeto,
@@ -61,7 +61,6 @@ app.post("/registrarse", async (request, response) => {
    }
 
    let existingUser = await db.collection("usuarios").findOne({usuario: user});
-   log(request.user.username, "registrarse", user);
    if (existingUser == null) {
       try {
          bcrypt.genSalt(10, (error, salt) => {
@@ -70,6 +69,7 @@ app.post("/registrarse", async (request, response) => {
                if (error) throw error;
                let newUser = {usuario: user, password: hash, fullName: fname, role: role};
                await db.collection("usuarios").insertOne(newUser);
+               log(fname, "registrarse", user);
                response.sendStatus(201); // Created
             });
          });
@@ -94,7 +94,7 @@ app.post("/login", async (req, res) => {
    const token = jwt.sign({username: user.usuario, role: user.role}, SECRET_KEY, {
       expiresIn: "1h",
    });
-
+   log(user.fullName, "login", user.usuario);
    res.json({token, username: user.usuario});
 });
 
