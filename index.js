@@ -23,7 +23,6 @@ function verifyJWT(req, res, next) {
    const authHeader = req.headers["authorization"];
    const token = authHeader && authHeader.split(" ")[1];
    jwt.verify(token, SECRET_KEY, (err, user) => {
-   
       if (err) {
          return res.sendStatus(403);
       }
@@ -33,7 +32,9 @@ function verifyJWT(req, res, next) {
 }
 
 app.use("/tickets", verifyJWT, ticketsRouter);
-app.use("/reportes", verifyJWT, reportsRouter);
+app.use("/reports", verifyJWT, reportsRouter);
+app.use("/categories", verifyJWT, categoriesRouter);
+app.use("/classrooms", verifyJWT, classroomsRouter);
 
 app.post("/registrarse", async (request, response) => {
    let user = request.body.username;
@@ -124,10 +125,9 @@ app.get("/", (_req, res) => {
    });
 });
 
-app.use("/tickets", ticketsRouter);
-app.use("/categories", categoriesRouter);
-app.use("/reports", reportsRouter);
-app.use("/classrooms", classroomsRouter);
+// ---- posiblemente deprecadas ----
+// app.use("/tickets", ticketsRouter);
+// app.use("/reports", reportsRouter);
 
 app.listen(PORT, () => {
    connectDB();
