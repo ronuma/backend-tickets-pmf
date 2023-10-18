@@ -3,24 +3,15 @@ import "dotenv/config";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {MongoClient} from "mongodb";
 import {ticketsRouter} from "./routes/tickets.js";
 import {categoriesRouter} from "./routes/categories.js";
 import {reportsRouter} from "./routes/reports.js";
 import {classroomsRouter} from "./routes/classrooms.js";
+import {db} from "./db.js";
 
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET; // env file
 const PORT = process.env.port || 8080;
-
-// function to connect to mongo db
-let db;
-async function connectDB() {
-   const client = new MongoClient(process.env.MONGO_URL);
-   await client.connect();
-   db = client.db();
-   console.log("Connected to the database:", db.databaseName);
-}
 
 // Middleware
 app.use(express.json());
@@ -108,6 +99,5 @@ app.post("/login", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-   connectDB();
    console.log(`Server is running on port ${PORT}.`);
 });
