@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {createReport, getReports} from "../helpers/reports.js";
+import {createReport, getReports, getReportById} from "../helpers/reports.js";
 
 const router = Router();
 
@@ -19,6 +19,25 @@ router.get("/", async (req, res) => {
          error,
       });
    }
+});
+
+router.get("/:id", async (req, res) => {
+  if (req.user.role === "Aula") {
+      return res.status(401).json({
+         msg: "No tienes permisos para ver reportes",
+      });
+   }
+  try {
+    const id = parseInt(req.params.id);
+    const report = await getReportById(id);
+    res.status(200).json(report);
+  } catch (error) {
+    console.log("GET REPORT ERROR: ", error);
+    res.status(500).json({
+      msg: "Error al obtener el reporte",
+      error,
+    });
+  }
 });
 
 router.post("/", async (req, res) => {

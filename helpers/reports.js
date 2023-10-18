@@ -4,6 +4,7 @@ import {
    getActiveTickets,
    getNewTickets,
    getClosedTickets,
+  getAverageClosureTime,
 } from "./tickets.js";
 import {db} from "../db.js";
 
@@ -13,6 +14,13 @@ export const getReports = async () => {
       delete report._id;
    });
    return reports;
+};
+
+export const getReportById = async id => {
+  const report = await db.collection("reports").findOne({id});
+  console.log("report: ", report);
+  delete report._id;
+  return report;
 };
 
 export const createReport = async () => {
@@ -26,7 +34,8 @@ export const createReport = async () => {
       name: `Reporte de la semana ${weekStartStr} al ${weekEndStr}`,
       mostTicketsClassroom: await getMostTicketsClassroom(weekStart, weekEnd),
       leastTicketsClassroom: await getLeastTicketsClassroom(weekStart, weekEnd),
-      avgClosureTime: await computeAvgClosureTime(weekStart, weekEnd),
+      avgClosureTime: await getAverageClosureTime(weekStart, weekEnd),
+      // avgClosureTime: await computeAvgClosureTime(weekStart, weekEnd),
       activeTickets: await getActiveTickets(),
       newTickets: await getNewTickets(weekStart, weekEnd),
       closedTickets: await getClosedTickets(weekStart, weekEnd),
