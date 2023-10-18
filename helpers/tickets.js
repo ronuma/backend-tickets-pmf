@@ -12,7 +12,7 @@ export async function getTickets() {
 // gets an individual ticket by its id and returns it
 export async function getTicketById(id) {
    const ticket = await db.collection("tickets").findOne({id: Number(id)});
-   delete ticket._id;
+   delete ticket?._id;
    return ticket;
 }
 
@@ -79,12 +79,13 @@ export async function getMostTicketsClassroom(weekStart, weekEnd) {
       .collection("tickets")
       .aggregate([
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
-          {$group: {_id: "$classroomId", count: {$sum: 1}}},
-          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
-          {$group: {_id: "$classroom.name", count: {$sum: 1}}},
-          {$sort: {count: 1}},
-          {$limit: 1},
-      ]).toArray();
+         {$group: {_id: "$classroomId", count: {$sum: 1}}},
+         {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
+         {$group: {_id: "$classroom.name", count: {$sum: 1}}},
+         {$sort: {count: 1}},
+         {$limit: 1},
+      ])
+      .toArray();
 
    return result;
 }
@@ -95,21 +96,21 @@ export async function getLeastTicketsClassroom(weekStart, weekEnd) {
       .aggregate([
          {$match: {createdAt: {$gte: weekStart, $lte: weekEnd}}},
          {$group: {_id: "$classroomId", count: {$sum: 1}}},
-          {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
-          {$group: {_id: "$classroom.name", count: {$sum: 1}}},
-          {$sort: {count: -1}},
+         {$lookup: {from: "classrooms", localField: "_id", foreignField: "id", as: "classroom"}},
+         {$group: {_id: "$classroom.name", count: {$sum: 1}}},
+         {$sort: {count: -1}},
          {$limit: 1},
-      ]).toArray();
+      ])
+      .toArray();
 
    return result;
 }
 
 export async function deleteTickets(ids) {
    const deletedIds = [];
-   for(let id of ids) {
-       await deleteTicket(id); 
-       deletedIds.push(id);
+   for (let id of ids) {
+      await deleteTicket(id);
+      deletedIds.push(id);
    }
    return deletedIds;
 }
-

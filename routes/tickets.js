@@ -5,7 +5,7 @@ import {
    createTicket,
    updateTicket,
    deleteTicket,
-   deleteTickets
+   deleteTickets,
 } from "../helpers/tickets.js";
 // import {validatePost, validatePut} from "../middlewares/tickets.js";
 
@@ -17,8 +17,8 @@ router.get("/", async (_req, res) => {
       const q = _req.query.q;
       let data = allData;
       if (q) {
-         data = data.filter(ticket => 
-            ticket.title.includes(q) // Replace with the actual fields and conditions // you want to search on.
+         data = data.filter(
+            ticket => ticket.title.includes(q) // Replace with the actual fields and conditions // you want to search on.
          );
       }
       res.setHeader("Content-Range", `tickets 0-${data.length}/${data.length}`);
@@ -65,11 +65,6 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-   if (req.user.role !== "Aula") {
-      return res.status(401).json({
-         msg: "No tienes permisos para actualizar tickets",
-      });
-   }
    try {
       const {id} = req.params;
       delete req.body._id;
@@ -88,9 +83,8 @@ router.put("/:id", async (req, res) => {
    }
 });
 
-
 router.delete("/:id", async (req, res) => {
-   if (req.user.role !== "Aula") {
+   if (req.user.role === "Aula") {
       return res.status(401).json({
          msg: "No tienes permisos para actualizar tickets",
       });
@@ -110,26 +104,22 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.delete("/", async (req, res) => {
-   if (req.user.role !== "Aula") {
-       return res.status(401).json({
-           msg: "No tienes permisos para eliminar tickets",
-       });
+   if (req.user.role === "Aula") {
+      return res.status(401).json({
+         msg: "No tienes permisos para eliminar tickets",
+      });
    }
    try {
-       const ids = JSON.parse(req.query.id || "[]"); 
-       const results = await deleteTickets(ids);
-       res.json({ data: results}); 
+      const ids = JSON.parse(req.query.id || "[]");
+      const results = await deleteTickets(ids);
+      res.json({data: results});
    } catch (error) {
-       console.log("DELETE MANY TICKETS ERROR: ", error);
-       res.status(500).json({
-           msg: "Error al eliminar los tickets",
-           error,
-       });
+      console.log("DELETE MANY TICKETS ERROR: ", error);
+      res.status(500).json({
+         msg: "Error al eliminar los tickets",
+         error,
+      });
    }
 });
-
-
-
-
 
 export {router as ticketsRouter};
