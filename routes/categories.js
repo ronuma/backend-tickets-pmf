@@ -8,7 +8,6 @@ router.get("/", async (req, res) => {
    try {
       const data = await getCategories();
       res.setHeader("Content-Range", `categories 0-${data.length}/${data.length}`);
-      log(req.user.username, "GET CATEGORIES", "OK");
       res.json(data);
    } catch (error) {
       console.log("GET CATEGORIES ERROR: ", error);

@@ -22,7 +22,6 @@ router.get("/", async (req, res) => {
          );
       }
       res.setHeader("Content-Range", `tickets 0-${data.length}/${data.length}`);
-      log(req.user.username, "GET TICKETS", "OK");
       res.json(data);
    } catch (error) {
       console.log("GET TICKETS ERROR: ", error);
@@ -42,7 +41,6 @@ router.get("/:id", async (req, res) => {
             msg: "Ticket no encontrado",
          });
       }
-      log(req.user.username, "GET TICKET BY ID", id);
       res.json(ticket);
    } catch (error) {
       console.log("GET TICKET BY ID ERROR: ", error);

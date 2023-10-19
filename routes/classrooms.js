@@ -15,7 +15,6 @@ router.get("/", async (req, res) => {
    try {
       const data = await getClassrooms();
       res.setHeader("Content-Range", `classrooms 0-${data.length}/${data.length}`);
-      log(req.user.username, "GET CLASSROOMS", "OK");
       res.json(data);
    } catch (error) {
       console.log("GET CLASSROOMS ERROR: ", error);
@@ -29,7 +28,6 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
    try {
       const data = await getClassroomById(req.params.id);
-      log(req.user.username, "GET CLASSROOM BY ID", req.params.id);
       res.json(data);
    } catch (error) {
       console.log("GET CLASSROOM BY ID ERROR: ", error);

@@ -12,7 +12,6 @@ router.get("/", async (req, res) => {
    }
    try {
       const reports = await getReports();
-      log(req.user.username, "GET REPORTS", "OK");
       res.status(200).json(reports);
    } catch (error) {
       console.log("GET REPORTS ERROR: ", error);
@@ -32,7 +31,6 @@ router.get("/:id", async (req, res) => {
    try {
       const id = parseInt(req.params.id);
       const report = await getReportById(id);
-      log(req.user.username, "GET REPORT BY ID", id);
       res.status(200).json(report);
    } catch (error) {
       console.log("GET REPORT ERROR: ", error);
